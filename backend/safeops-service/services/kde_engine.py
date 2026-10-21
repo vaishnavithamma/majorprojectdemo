@@ -26,9 +26,13 @@ def init_kde_engine(data_path: str):
     global _fir_points_df, _ball_tree
     
     if not os.path.exists(data_path):
-        raise FileNotFoundError(f"FIR dataset not found at {data_path}")
-
-    if data_path.endswith('.parquet'):
+        print(f"[SafeOps Warning] FIR dataset not found at {data_path}. Creating fallback dataset...")
+        # Fallback synthetic points centered around Bengaluru
+        np.random.seed(42)
+        lats = 12.9716 + np.random.normal(0, 0.05, 1000)
+        lons = 77.5946 + np.random.normal(0, 0.05, 1000)
+        _fir_points_df = pd.DataFrame({'Latitude': lats, 'Longitude': lons})
+    elif data_path.endswith('.parquet'):
         _fir_points_df = pd.read_parquet(data_path)
     else:
         _fir_points_df = pd.read_csv(data_path)
