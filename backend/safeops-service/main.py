@@ -52,7 +52,33 @@ async def lifespan(app: FastAPI):
         print(f"[SafeOps] OSM Graph loaded. Nodes: {len(G_bengaluru.nodes)}, Edges: {len(G_bengaluru.edges)}")
     else:
         print("[SafeOps] GraphML not found, pulling fallback region...")
-        G_bengaluru = ox.graph_from_point((13.10, 77.60), dist=5000, network_type='drive')
+        try:
+            G_bengaluru = ox.graph_from_point((13.10, 77.60), dist=2000, network_type='drive')
+        except Exception as osm_err:
+            print(f"[SafeOps Warning] Could not download from Overpass API ({osm_err}). Initializing local synthetic graph...")
+            import networkx as nx
+            G_bengaluru = nx.MultiDiGraph()
+            G_bengaluru.graph['crs'] = 'epsg:4326'
+            # Add basic interconnected grid nodes around Bengaluru
+            base_lat, base_lon = 12.9716, 77.5946
+            for i in range(15):
+                for j in range(15):
+                    node_id = i * 15 + j
+                    lat = base_lat + (i - 7) * 0.005
+                    lon = base_lon + (j - 7) * 0.005
+                    G_bengaluru.add_node(node_id, x=lon, y=lat, street_count=4)
+            # Connect grid nodes
+            for i in range(15):
+                for j in range(15):
+                    u = i * 15 + j
+                    if j < 14:
+                        v = i * 15 + (j + 1)
+                        G_bengaluru.add_edge(u, v, length=500.0, highway='residential', oneway=False)
+                        G_bengaluru.add_edge(v, u, length=500.0, highway='residential', oneway=False)
+                    if i < 14:
+                        v = (i + 1) * 15 + j
+                        G_bengaluru.add_edge(u, v, length=500.0, highway='residential', oneway=False)
+                        G_bengaluru.add_edge(v, u, length=500.0, highway='residential', oneway=False)
 
     # Initialize SCC Spatial Index for guaranteed reachability
     print("[SafeOps] Initializing SCC spatial index...")
