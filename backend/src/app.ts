@@ -15,20 +15,35 @@ import telegramRoutes from "@/routes/telegram.routes";
 const app = express();
 
 /* =========================================================
-   CORS & PREFLIGHT
+   CORS & PREFLIGHT HEADERS (GUARANTEED FOR ALL DOMAINS)
 ========================================================= */
 
-app.use(
-  cors({
-    origin: true, // Automatically reflects the request origin (supports localhost & any onrender domain)
-    credentials: true,
-    methods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
-    allowedHeaders: ["Content-Type", "Authorization", "X-Requested-With"],
-    optionsSuccessStatus: 200,
-  })
-);
+app.use((req, res, next) => {
+  const origin = req.headers.origin;
+  if (origin) {
+    res.setHeader("Access-Control-Allow-Origin", origin);
+  } else {
+    res.setHeader("Access-Control-Allow-Origin", "*");
+  }
+  res.setHeader("Access-Control-Allow-Credentials", "true");
+  res.setHeader(
+    "Access-Control-Allow-Methods",
+    "GET,HEAD,PUT,PATCH,POST,DELETE,OPTIONS"
+  );
+  res.setHeader(
+    "Access-Control-Allow-Headers",
+    "Origin, X-Requested-With, Content-Type, Accept, Authorization"
+  );
 
-app.options("*", cors());
+  // Intercept OPTIONS preflight immediately with 200 OK
+  if (req.method === "OPTIONS") {
+    return res.status(200).end();
+  }
+
+  next();
+});
+
+app.use(cors());
 
 /* =========================================================
    SECURITY
