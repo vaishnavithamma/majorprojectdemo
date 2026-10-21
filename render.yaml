@@ -27,8 +27,8 @@ services:
     env: node
     rootDir: backend
     plan: free
-    buildCommand: "npm install && npx prisma generate && npm run build"
-    startCommand: "npm start"
+    buildCommand: "npm install && npx prisma generate"
+    startCommand: "npx tsx src/server.ts"
     envVars:
       - key: PORT
         value: 5000
