@@ -1,0 +1,10 @@
+﻿python :   File "<string>", line 18
+At line:1 char:1
++ python -c "
++ ~~~~~~~~~~~
+    + CategoryInfo          : NotSpecified: (  File "<string>", line 18:String) [], RemoteException
+    + FullyQualifiedErrorId : NativeCommandError
+ 
+    print(f'--- CELL {i} ({c[chr(34)]cell_type{chr(34)]}) ---')
+                                                              ^
+SyntaxError: f-string: closing parenthesis ']' does not match opening parenthesis '{'

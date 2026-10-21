@@ -1,0 +1,75 @@
+databases:
+  - name: safeops-postgres
+    databaseName: majorproject
+    user: safeops_user
+    plan: free
+
+services:
+  # -------------------------------------------------------------
+  # 1. Python ML Safe Route Microservice
+  # -------------------------------------------------------------
+  - type: web
+    name: safeops-ml-service
+    env: python
+    rootDir: backend/safeops-service
+    plan: free
+    buildCommand: "pip install --upgrade pip && pip install -r requirements.txt"
+    startCommand: "uvicorn main:app --host 0.0.0.0 --port 8000"
+    envVars:
+      - key: PORT
+        value: 8000
+
+  # -------------------------------------------------------------
+  # 2. Node.js Express API Backend
+  # -------------------------------------------------------------
+  - type: web
+    name: safeops-backend
+    env: node
+    rootDir: backend
+    plan: free
+    buildCommand: "npm install && npx prisma generate && npm run build"
+    startCommand: "npm start"
+    envVars:
+      - key: PORT
+        value: 5000
+      - key: DATABASE_URL
+        fromDatabase:
+          name: safeops-postgres
+          property: connectionString
+      - key: JWT_SECRET
+        generateValue: true
+      - key: JWT_EXPIRES_IN
+        value: 7d
+      - key: SAFEOPS_SERVICE_URL
+        fromService:
+          type: web
+          name: safeops-ml-service
+          property: host
+      - key: TELEGRAM_BOT_TOKEN
+        sync: false
+      - key: TELEGRAM_CHAT_ID
+        sync: false
+      - key: CALLMEBOT_USERNAME
+        sync: false
+
+  # -------------------------------------------------------------
+  # 3. React Frontend (Vite Static Site)
+  # -------------------------------------------------------------
+  - type: web
+    name: safeops-frontend
+    env: static
+    rootDir: frontend
+    plan: free
+    buildCommand: "npm install && npm run build"
+    staticPublishPath: dist
+    routes:
+      - type: rewrite
+        source: /*
+        destination: /index.html
+    envVars:
+      - key: VITE_API_URL
+        fromService:
+          type: web
+          name: safeops-backend
+          property: host
+          value: https://${host}/api

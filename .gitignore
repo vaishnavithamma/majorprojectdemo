@@ -1,0 +1,26 @@
+node_modules
+
+dist
+
+.env
+
+coverage
+
+uploads
+
+*.log
+
+.vscode
+
+.DS_Store
+
+prisma/dev.db
+prisma/dev.db-journal
+
+# Large OSM Graphs & Data Files (>100MB)
+*.graphml
+*.parquet
+cache/
+backend/safeops-service/cache/
+__pycache__/
+*.pyc
