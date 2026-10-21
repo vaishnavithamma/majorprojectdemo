@@ -59,7 +59,7 @@ services:
     name: safeops-frontend
     runtime: static
     rootDir: frontend
-    buildCommand: "npm install && npm run build"
+    buildCommand: "VITE_API_URL=https://safeops-backend.onrender.com/api npm run build"
     staticPublishPath: dist
     routes:
       - type: rewrite
@@ -67,8 +67,4 @@ services:
         destination: /index.html
     envVars:
       - key: VITE_API_URL
-        fromService:
-          type: web
-          name: safeops-backend
-          property: host
-          value: https://${host}/api
+        value: https://safeops-backend.onrender.com/api

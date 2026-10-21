@@ -20,10 +20,17 @@ const app = express();
 
 app.use(
   cors({
-    origin: [
-      "http://localhost:3000",
-      "http://localhost:5173",
-    ],
+    origin: (origin, callback) => {
+      // Allow mobile apps, curl, postman (no origin) or any localhost/onrender domain
+      if (
+        !origin ||
+        origin.includes("localhost") ||
+        origin.includes("onrender.com")
+      ) {
+        return callback(null, true);
+      }
+      return callback(null, true);
+    },
     credentials: true,
   })
 );

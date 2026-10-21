@@ -304,9 +304,10 @@ export default function Dashboard() {
             return;
           }
 
+          const API_URL = import.meta.env.VITE_API_URL || "http://localhost:5000/api";
           const response =
             await fetch(
-              "http://localhost:5000/api/emergency-contacts",
+              `${API_URL}/emergency-contacts`,
               {
                 method: "GET",
 
