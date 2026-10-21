@@ -15,31 +15,30 @@ import telegramRoutes from "@/routes/telegram.routes";
 const app = express();
 
 /* =========================================================
-   CORS
+   CORS & PREFLIGHT
 ========================================================= */
 
 app.use(
   cors({
-    origin: (origin, callback) => {
-      // Allow mobile apps, curl, postman (no origin) or any localhost/onrender domain
-      if (
-        !origin ||
-        origin.includes("localhost") ||
-        origin.includes("onrender.com")
-      ) {
-        return callback(null, true);
-      }
-      return callback(null, true);
-    },
+    origin: true, // Automatically reflects the request origin (supports localhost & any onrender domain)
     credentials: true,
+    methods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
+    allowedHeaders: ["Content-Type", "Authorization", "X-Requested-With"],
+    optionsSuccessStatus: 200,
   })
 );
+
+app.options("*", cors());
 
 /* =========================================================
    SECURITY
 ========================================================= */
 
-app.use(helmet());
+app.use(
+  helmet({
+    crossOriginResourcePolicy: { policy: "cross-origin" },
+  })
+);
 
 /* =========================================================
    LOGGING
